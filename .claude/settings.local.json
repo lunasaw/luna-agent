@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(chmod:*)",
+      "Bash(sudo useradd:*)",
+      "Bash(sudo chown:*)",
+      "Bash(sudo chmod:*)",
+      "Bash(sudo -u agent bash -c \"cd /data/luna && touch test_write_permission.txt && rm test_write_permission.txt && echo ''Write test successful''\")",
+      "Bash(sudo -u agent bash -c \"ls -la | head -10\")"
+    ]
+  }
+}
