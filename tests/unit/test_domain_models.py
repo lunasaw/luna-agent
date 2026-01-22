@@ -38,5 +38,5 @@ def test_agent_response_immutability():
         trace_id="trace",
     )
 
-    with pytest.raises(Exception):  # frozen dataclass
+    with pytest.raises(AttributeError):  # frozen dataclass
         response.content = "new content"  # type: ignore

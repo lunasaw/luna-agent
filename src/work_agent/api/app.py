@@ -1,7 +1,6 @@
 """FastAPI 应用（可选依赖）"""
 
 import logging
-from typing import Any
 
 from fastapi import FastAPI
 

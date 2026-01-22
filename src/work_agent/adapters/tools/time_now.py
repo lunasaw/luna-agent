@@ -1,8 +1,9 @@
 """时间查询工具（示例 - 无网络依赖）"""
 
 from datetime import datetime, timezone
+from typing import Any
 
-from openai.agents import function_tool
+from agents import function_tool
 
 
 @function_tool
@@ -21,6 +22,6 @@ def get_current_time(timezone_name: str = "UTC") -> str:
     return now.isoformat()
 
 
-def get_tool():
+def get_tool() -> Any:
     """暴露 tool 供自动发现"""
     return get_current_time

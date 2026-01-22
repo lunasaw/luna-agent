@@ -3,8 +3,7 @@
 import logging
 from typing import Any
 
-from openai import OpenAI
-from openai.agents import Runner
+from agents import Runner
 
 from work_agent.config import Config
 
@@ -23,11 +22,8 @@ def build_runner(config: Config) -> Any:
     """
     logger.info(f"Building runner with backend: {config.session_backend}")
 
-    # 创建 OpenAI 客户端
-    client = OpenAI(api_key=config.openai_api_key)
-
-    # 创建 Runner
-    runner = Runner(client=client)
+    # 创建 Runner（不需要 client 参数）
+    runner = Runner()
 
     logger.info("Runner built successfully")
     return runner

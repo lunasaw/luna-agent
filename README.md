@@ -14,6 +14,11 @@
 
 ## 快速开始
 
+### 0. 环境要求
+
+- Python 3.10+ （推荐 Python 3.11+）
+- uv 或 pip 包管理工具
+
 ### 1. 安装依赖
 
 本项目使用 `uv` 作为包管理工具。
@@ -47,7 +52,7 @@ cp .env.example .env
 #### 列出所有可用 tools
 
 ```bash
-python -m work_agent --list-tools
+python -m work_agent list-tools
 ```
 
 #### 单次运行
@@ -139,7 +144,8 @@ python -m work_agent serve --port 8000
 
 ```python
 """天气查询工具"""
-from openai.agents import function_tool
+from typing import Any
+from agents import function_tool
 
 @function_tool
 def get_weather(city: str) -> str:
@@ -156,7 +162,7 @@ def get_weather(city: str) -> str:
     return f"{city}的天气：晴天，温度 25℃"
 
 # 必须暴露以便自动发现
-def get_tool():
+def get_tool() -> Any:
     return get_weather
 ```
 
@@ -165,7 +171,7 @@ def get_tool():
 无需手动注册！重启 CLI 即可：
 
 ```bash
-python -m work_agent --list-tools
+python -m work_agent list-tools
 # 你会看到新增的 get_weather
 ```
 

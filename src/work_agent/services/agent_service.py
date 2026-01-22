@@ -6,7 +6,6 @@ from typing import Any
 from work_agent.adapters.observability.context import new_trace_id
 from work_agent.config import Config
 from work_agent.domain.errors import AgentExecutionError
-from work_agent.domain.models import AgentRequest, AgentResponse
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +55,7 @@ class AgentService:
             result_content = self._extract_response_content(response)
 
             logger.info(
-                f"Agent completed successfully",
+                "Agent completed successfully",
                 extra={"trace_id": trace_id, "response_length": len(result_content)},
             )
 

@@ -3,7 +3,7 @@
 import logging
 from typing import Any
 
-from openai.agents import Agent
+from agents import Agent
 
 from work_agent.config import Config
 

@@ -1,6 +1,5 @@
 """配置管理 - 唯一读取环境变量的位置"""
 
-import os
 import sys
 from typing import Literal
 

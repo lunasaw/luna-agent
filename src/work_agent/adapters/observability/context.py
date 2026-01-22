@@ -2,10 +2,9 @@
 
 import uuid
 from contextvars import ContextVar
-from typing import Optional
 
 # 使用 contextvars 存储 trace_id（线程安全）
-_trace_id_var: ContextVar[Optional[str]] = ContextVar("trace_id", default=None)
+_trace_id_var: ContextVar[str | None] = ContextVar("trace_id", default=None)
 
 
 def new_trace_id() -> str:
@@ -20,7 +19,7 @@ def new_trace_id() -> str:
     return trace_id
 
 
-def get_trace_id() -> Optional[str]:
+def get_trace_id() -> str | None:
     """
     获取当前上下文的 trace_id
 

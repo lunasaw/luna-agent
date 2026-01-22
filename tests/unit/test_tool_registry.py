@@ -1,6 +1,5 @@
 """Tool Registry 单元测试"""
 
-import pytest
 
 from work_agent.adapters.tools._registry import ToolRegistry
 

@@ -1,7 +1,6 @@
 """API 路由定义"""
 
 import logging
-from typing import Any
 
 from fastapi import APIRouter, HTTPException
 
@@ -68,15 +67,16 @@ def create_router(container: Container) -> APIRouter:
                 content=result,
                 trace_id=trace_id,
                 success=True,
+                error_message=None,
             )
 
         except AgentExecutionError as e:
             logger.error(f"Agent execution failed: {e}", exc_info=True)
-            raise HTTPException(status_code=500, detail=str(e))
+            raise HTTPException(status_code=500, detail=str(e)) from e
 
         except Exception as e:
             logger.error(f"Unexpected error: {e}", exc_info=True)
-            raise HTTPException(status_code=500, detail="Internal server error")
+            raise HTTPException(status_code=500, detail="Internal server error") from e
 
     # 预留端点（未实现）
     @router.put("/config/instructions")

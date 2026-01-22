@@ -75,7 +75,7 @@ class ToolRegistry:
                 logger.error(
                     f"Failed to load tool from '{module_name}': {e}",
                     exc_info=True,
-                    extra={"module": module_name},
+                    extra={"tool_module": module_name},
                 )
                 # 继续加载其他 tools（可选：改为 fail-fast）
                 continue

@@ -1,6 +1,8 @@
 """Shell Echo 工具（安全示例 - 仅 echo，禁止命令执行）"""
 
-from openai.agents import function_tool
+from typing import Any
+
+from agents import function_tool
 
 
 @function_tool
@@ -22,6 +24,6 @@ def shell_echo(text: str) -> str:
     return f"[ECHO] {text}"
 
 
-def get_tool():
+def get_tool() -> Any:
     """暴露 tool 供自动发现"""
     return shell_echo

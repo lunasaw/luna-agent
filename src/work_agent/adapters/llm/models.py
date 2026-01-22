@@ -2,7 +2,6 @@
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Optional
 
 
 class ModelProvider(str, Enum):
@@ -21,9 +20,9 @@ class ModelConfig:
     provider: ModelProvider
     model_name: str
     api_key: str
-    base_url: Optional[str] = None
+    base_url: str | None = None
     temperature: float = 0.7
-    max_tokens: Optional[int] = None
+    max_tokens: int | None = None
 
 
 def get_model_config(model_name: str, api_key: str) -> ModelConfig:

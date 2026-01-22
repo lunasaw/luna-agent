@@ -18,6 +18,6 @@ def safe_cast(value: Any, target_type: type[T], default: T) -> T:
         转换后的值或默认值
     """
     try:
-        return target_type(value)
+        return target_type(value)  # type: ignore[call-arg]
     except (ValueError, TypeError):
         return default

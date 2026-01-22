@@ -1,7 +1,6 @@
 """应用组装与 CLI 入口"""
 
 import sys
-from typing import Optional
 
 import typer
 

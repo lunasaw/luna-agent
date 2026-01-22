@@ -2,7 +2,7 @@
 
 import logging
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 
 from work_agent.adapters.llm.agent_factory import build_agent
 from work_agent.adapters.llm.runner_factory import build_runner

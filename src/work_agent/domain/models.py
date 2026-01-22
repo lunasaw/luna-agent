@@ -1,7 +1,6 @@
 """领域模型"""
 
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass(frozen=True)
@@ -10,7 +9,7 @@ class AgentRequest:
 
     user_input: str
     trace_id: str
-    session_id: Optional[str] = None
+    session_id: str | None = None
 
 
 @dataclass(frozen=True)
@@ -21,4 +20,4 @@ class AgentResponse:
     trace_id: str
     tool_calls_count: int = 0
     success: bool = True
-    error_message: Optional[str] = None
+    error_message: str | None = None

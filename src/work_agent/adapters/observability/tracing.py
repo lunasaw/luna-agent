@@ -1,7 +1,6 @@
 """Tracing 配置与集成（预留）"""
 
 import logging
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +41,7 @@ def is_tracing_enabled() -> bool:
     return _tracing_enabled
 
 
-def trace_event(event_name: str, metadata: Optional[dict] = None) -> None:
+def trace_event(event_name: str, metadata: dict | None = None) -> None:
     """
     记录 trace 事件（预留）
 
