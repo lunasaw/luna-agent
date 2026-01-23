@@ -95,16 +95,52 @@ def test_basic_chat(api_url: str, api_key: str, model: str) -> bool:
             logger.error(f"响应: {response.text}")
             return False
 
-        data = response.json()
-        content = data.get("choices", [{}])[0].get("message", {}).get("content", "")
-
-        logger.info(f"✅ 基础对话成功")
-        logger.info(f"响应: {content[:100]}...")
-        return True
+        # 尝试解析 JSON
+        try:
+            data = response.json()
+            content = data.get("choices", [{}])[0].get("message", {}).get("content", "")
+            logger.info(f"✅ 基础对话成功")
+            logger.info(f"响应: {content[:100]}...")
+            return True
+        except json.JSONDecodeError:
+            # 可能是 SSE 格式，尝试解析流式响应
+            logger.info("检测到流式响应格式，尝试解析...")
+            content = parse_sse_response(response.text)
+            if content:
+                logger.info(f"✅ 基础对话成功 (流式)")
+                logger.info(f"响应: {content[:100]}...")
+                return True
+            else:
+                logger.error("❌ 无法解析响应")
+                return False
 
     except Exception as e:
         logger.error(f"❌ 请求失败: {e}")
         return False
+
+
+def parse_sse_response(text: str) -> str:
+    """解析 SSE 格式的响应
+
+    Args:
+        text: SSE 格式文本
+
+    Returns:
+        str: 提取的内容
+    """
+    content = ""
+    for line in text.split('\n'):
+        if line.startswith('data: '):
+            data_str = line[6:]
+            if data_str == "[DONE]":
+                break
+            try:
+                data = json.loads(data_str)
+                delta = data.get("choices", [{}])[0].get("delta", {})
+                content += delta.get("content", "")
+            except json.JSONDecodeError:
+                continue
+    return content
 
 
 def test_function_calling(api_url: str, api_key: str, model: str) -> dict:
@@ -175,12 +211,23 @@ def test_function_calling(api_url: str, api_key: str, model: str) -> dict:
             logger.warning(f"可能不支持 function calling")
             return result
 
-        data = response.json()
+        # 尝试解析 JSON 或 SSE
+        try:
+            data = response.json()
+        except json.JSONDecodeError:
+            # 尝试解析 SSE 格式
+            logger.info("检测到流式响应，解析 SSE 格式...")
+            data = parse_sse_to_message(response.text)
+            if not data:
+                result["details"] = "无法解析响应格式"
+                logger.error("❌ 无法解析 SSE 响应")
+                return result
+
         logger.info("✅ 请求成功，分析响应...")
 
         # 检查响应格式
         choice = data.get("choices", [{}])[0]
-        message = choice.get("message", {})
+        message = choice.get("message", {}) or choice.get("delta", {})
 
         # 检查 OpenAI 格式的 tool_calls
         if "tool_calls" in message:
@@ -215,6 +262,71 @@ def test_function_calling(api_url: str, api_key: str, model: str) -> dict:
         result["details"] = f"请求异常: {str(e)}"
         logger.error(f"❌ 测试失败: {e}")
         return result
+
+
+def parse_sse_to_message(text: str) -> dict:
+    """将 SSE 格式转换为消息格式
+
+    Args:
+        text: SSE 格式文本
+
+    Returns:
+        dict: 消息字典
+    """
+    # 收集所有 delta
+    deltas = []
+    for line in text.split('\n'):
+        if line.startswith('data: '):
+            data_str = line[6:]
+            if data_str == "[DONE]":
+                break
+            try:
+                data = json.loads(data_str)
+                if "choices" in data and data["choices"]:
+                    delta = data["choices"][0].get("delta", {})
+                    deltas.append(delta)
+            except json.JSONDecodeError:
+                continue
+
+    # 合并 deltas
+    merged = {"content": "", "role": "assistant"}
+    tool_calls_parts = {}
+
+    for delta in deltas:
+        # 合并 content
+        if "content" in delta:
+            merged["content"] += delta["content"]
+
+        # 合并 role
+        if "role" in delta:
+            merged["role"] = delta["role"]
+
+        # 合并 tool_calls
+        if "tool_calls" in delta:
+            for tc in delta["tool_calls"]:
+                idx = tc.get("index", 0)
+                if idx not in tool_calls_parts:
+                    tool_calls_parts[idx] = {
+                        "id": tc.get("id", ""),
+                        "type": tc.get("type", "function"),
+                        "function": {"name": "", "arguments": ""}
+                    }
+
+                if "id" in tc:
+                    tool_calls_parts[idx]["id"] = tc["id"]
+                if "type" in tc:
+                    tool_calls_parts[idx]["type"] = tc["type"]
+                if "function" in tc:
+                    func = tc["function"]
+                    if "name" in func:
+                        tool_calls_parts[idx]["function"]["name"] += func["name"]
+                    if "arguments" in func:
+                        tool_calls_parts[idx]["function"]["arguments"] += func["arguments"]
+
+    if tool_calls_parts:
+        merged["tool_calls"] = [tool_calls_parts[i] for i in sorted(tool_calls_parts.keys())]
+
+    return {"choices": [{"message": merged}]} if merged else {}
 
 
 def test_streaming_function_calling(api_url: str, api_key: str, model: str) -> bool:
