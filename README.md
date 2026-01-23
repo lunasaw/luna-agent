@@ -226,24 +226,53 @@ python -m work_agent run "hello"
 
 ## 模型配置
 
-### 修改默认模型
+### 使用 OpenAI API（默认）
 
 编辑 `.env`：
 
 ```bash
+OPENAI_API_KEY=sk-your-key-here
 AGENT_MODEL=gpt-4o  # 默认
 # 或切换到其他模型
 AGENT_MODEL=gpt-4o-mini
 ```
 
-### 支持的 Provider（预留）
+### 使用 vLLM 本地部署（推荐）
 
-当前使用 OpenAI，未来可扩展：
-- Azure OpenAI
-- Anthropic Claude
-- 自定义 API endpoint
+vLLM 支持本地运行开源模型，无需调用 OpenAI API。
 
-修改 `adapters/llm/models.py` 与 `agent_factory.py` 即可。
+**快速开始:**
+
+```bash
+# 1. 启动 vLLM 服务
+./scripts/start_vllm.sh
+
+# 2. 配置环境变量
+export OPENAI_API_KEY=EMPTY
+export OPENAI_API_BASE=http://localhost:8000/v1
+export AGENT_MODEL=Qwen/Qwen2.5-7B-Instruct
+
+# 3. 测试 Agent
+.venv/bin/python scripts/test_vllm_agent.py
+```
+
+**优势:**
+- ✅ 数据不出本地，保护隐私
+- ✅ 无需支付 API 费用
+- ✅ GPU 加速，高性能推理
+- ✅ 支持 Qwen、Llama、Mistral 等开源模型
+
+**详细文档:**
+- [vLLM 快速开始](docs/VLLM_QUICK_START.md) - 5 分钟上手
+- [vLLM 完整指南](docs/VLLM_INTEGRATION.md) - 高级配置和生产部署
+
+### 支持的 Provider
+
+当前支持：
+- ✅ OpenAI API（官方）
+- ✅ vLLM（本地部署，OpenAI 兼容）
+- 🔄 Azure OpenAI（修改 `OPENAI_API_BASE`）
+- 🔄 其他 OpenAI 兼容服务
 
 ## 视图层扩展路线
 

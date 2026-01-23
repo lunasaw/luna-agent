@@ -92,7 +92,7 @@ async def main() -> None:
         print("❌ 错误: 未设置 WEATHER_API_KEY 环境变量")
         print("\n使用方法:")
         print("  export WEATHER_API_KEY=your_api_key")
-        print("  python -m work_agent.adapters.external.services.weather_service")
+        print("  .venv/bin/python src/work_agent/adapters/external/services/weather_service.py")
         return
 
     print(f"🔧 配置信息:")

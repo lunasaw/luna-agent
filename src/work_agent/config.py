@@ -19,6 +19,10 @@ class Config(BaseSettings):
 
     # OpenAI 配置
     openai_api_key: str = Field(..., description="OpenAI API Key")
+    openai_api_base: str = Field(
+        default="",
+        description="OpenAI API Base URL (用于 vLLM 等兼容服务)"
+    )
 
     # Agent 配置
     agent_model: str = Field(default="gpt-4o", description="Agent 模型名称")
