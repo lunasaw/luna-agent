@@ -1,5 +1,6 @@
 """Agent 服务 - 用例编排层"""
 
+import asyncio
 import logging
 from typing import Any
 
@@ -48,8 +49,8 @@ class AgentService:
         )
 
         try:
-            # 执行 Agent
-            response = self.runner.run(self.agent, user_input)
+            # 执行 Agent (runner.run 是 async 方法)
+            response = asyncio.run(self.runner.run(self.agent, user_input))
 
             # 提取结果
             result_content = self._extract_response_content(response)

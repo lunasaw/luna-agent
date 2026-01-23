@@ -26,6 +26,7 @@ class Config(BaseSettings):
 
     # Agent 配置
     agent_model: str = Field(default="gpt-4o", description="Agent 模型名称")
+    agent_timeout: float = Field(default=60.0, description="Agent API 请求超时时间（秒）")
 
     # 日志配置
     log_level: str = Field(default="INFO", description="日志级别")

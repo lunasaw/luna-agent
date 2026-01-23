@@ -1,6 +1,7 @@
 """Agent 工厂 - 构建 OpenAI Agents SDK Agent"""
 
 import logging
+import os
 from typing import Any
 
 from agents import Agent
@@ -41,6 +42,17 @@ def build_agent(config: Config, tools: list[Any]) -> Agent:
     """
     logger.info(f"Building agent with model: {config.agent_model}")
     logger.info(f"Agent tools count: {len(tools)}")
+
+    # 配置 OpenAI 环境变量（Agent SDK 会自动读取）
+    os.environ["OPENAI_API_KEY"] = config.openai_api_key
+
+    if config.openai_api_base:
+        os.environ["OPENAI_BASE_URL"] = config.openai_api_base
+        logger.info(f"Using custom API base: {config.openai_api_base}")
+
+    # 配置超时（通过环境变量）
+    os.environ["OPENAI_TIMEOUT"] = str(config.agent_timeout)
+    logger.info(f"OpenAI client timeout: {config.agent_timeout}s")
 
     agent = Agent(
         name="work-agent",
