@@ -49,11 +49,9 @@ class AgentService:
         )
 
         try:
-            # 执行 Agent (runner.run 是 async 方法)
-            response = asyncio.run(self.runner.run(self.agent, user_input))
-
-            # 提取结果
-            result_content = self._extract_response_content(response)
+            # 执行 Agent (agent.run 是 async 方法)
+            # BaseAgent.run() 直接返回字符串结果
+            result_content = asyncio.run(self.agent.run(user_input))
 
             logger.info(
                 "Agent completed successfully",

@@ -7,6 +7,7 @@ from typing import Any
 from qwen_agent.agents import Assistant
 
 from work_agent.adapters.llm.base_agent import BaseAgent
+from work_agent.adapters.llm.tool_converter import OpenAIToolWrapper
 
 logger = logging.getLogger(__name__)
 
@@ -83,11 +84,11 @@ class QwenAgentAdapter(BaseAgent):
         """添加工具
 
         Args:
-            tool: 工具对象（需要是 Qwen-Agent 兼容的格式）
+            tool: 工具对象（OpenAI FunctionTool 格式）
         """
-        # Qwen-Agent 使用 function_list
-        # 工具需要是 BaseTool 的子类或工具名称字符串
-        self.function_list.append(tool)
+        # 将 OpenAI 工具转换为 Qwen-Agent 兼容格式
+        wrapped_tool = OpenAIToolWrapper(tool)
+        self.function_list.append(wrapped_tool)
 
         # 重新创建 Agent 实例以更新工具列表
         self.agent = Assistant(
@@ -96,4 +97,4 @@ class QwenAgentAdapter(BaseAgent):
             function_list=self.function_list,
         )
 
-        logger.info(f"Tool added to Qwen-Agent, total tools: {len(self.function_list)}")
+        logger.info(f"Tool added to Qwen-Agent (wrapped), total tools: {len(self.function_list)}")
