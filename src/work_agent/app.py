@@ -5,7 +5,7 @@ import sys
 import typer
 
 from work_agent.config import load_config
-from work_agent.container import build_container, shutdown_container
+from work_agent.container import build_container, set_global_container, shutdown_container
 from work_agent.logging import configure_logging
 
 app = typer.Typer(
@@ -33,6 +33,7 @@ def run(user_input: str) -> None:
 
         # 3. 构建容器
         container = build_container(config)
+        set_global_container(container)
 
         # 4. 执行运行
         result = container.agent_service.run_once(user_input)
@@ -63,6 +64,7 @@ def repl() -> None:
 
         # 3. 构建容器
         container = build_container(config)
+        set_global_container(container)
 
         # 4. 启动 REPL
         typer.echo("=== Work Agent REPL ===")
@@ -95,6 +97,7 @@ def list_tools() -> None:
 
         # 3. 构建容器（仅需 tool_registry）
         container = build_container(config)
+        set_global_container(container)
 
         # 4. 列出 tools
         typer.echo("\n=== Available Tools ===\n")
@@ -143,6 +146,7 @@ def serve(
 
         # 3. 构建容器
         container = build_container(config)
+        set_global_container(container)
 
         # 4. 创建 FastAPI app
         api_app = create_api_app(container)

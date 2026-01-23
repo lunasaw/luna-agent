@@ -39,6 +39,14 @@ class Config(BaseSettings):
     api_host: str = Field(default="0.0.0.0", description="API 监听地址")
     api_port: int = Field(default=8000, description="API 监听端口")
 
+    # Weather API 配置
+    weather_api_key: str = Field(default="", description="Weather API Key")
+    weather_api_base_url: str = Field(
+        default="https://api.openweathermap.org/data/2.5",
+        description="Weather API Base URL"
+    )
+    weather_api_timeout: float = Field(default=10.0, description="Weather API 超时时间")
+
 
 def load_config() -> Config:
     """

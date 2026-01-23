@@ -248,7 +248,7 @@ def generate_full_scaffold(api_name: str, project_root: str = ".") -> dict[str, 
     Returns:
         生成的文件路径字典
     """
-    paths = {{}}
+    paths = {}
 
     # 确保目录存在
     apis_dir = Path(project_root) / "src/work_agent/adapters/external/apis"
@@ -263,18 +263,18 @@ def generate_full_scaffold(api_name: str, project_root: str = ".") -> dict[str, 
     paths["service"] = generate_service_template(api_name, str(services_dir))
     paths["tool"] = generate_tool_template(api_name, str(tools_dir))
 
-    print(f"✅ 已生成 {{api_name}} 的完整脚手架:")
+    print(f"✅ 已生成 {api_name} 的完整脚手架:")
     for key, path in paths.items():
-        print(f"  - {{key}}: {{path}}")
+        print(f"  - {key}: {path}")
 
-    print(f"\\n📝 下一步:")
-    print(f"  1. 在 config.py 中添加 {{api_name}} 的配置项")
+    print(f"\n📝 下一步:")
+    print(f"  1. 在 config.py 中添加 {api_name} 的配置项")
     print(f"  2. 在 .env.example 中添加环境变量示例")
-    print(f"  3. 实现 {{paths['api']}} 中的 API 调用逻辑")
-    print(f"  4. 实现 {{paths['service']}} 中的业务逻辑")
-    print(f"  5. 完善 {{paths['tool']}} 中的工具描述和参数")
+    print(f"  3. 实现 {paths['api']} 中的 API 调用逻辑")
+    print(f"  4. 实现 {paths['service']} 中的业务逻辑")
+    print(f"  5. 完善 {paths['tool']} 中的工具描述和参数")
     print(f"  6. 在 container.py 中注册服务")
-    print(f"  7. 编写测试: tests/unit/test_{{api_name}}_api.py")
+    print(f"  7. 编写测试: tests/unit/test_{api_name}_api.py")
 
     return paths
 

@@ -4,6 +4,8 @@ import logging
 from dataclasses import dataclass
 from typing import Any
 
+from work_agent.adapters.external.apis.weather_api import WeatherApiClient
+from work_agent.adapters.external.services.weather_service import WeatherService
 from work_agent.adapters.llm.agent_factory import build_agent
 from work_agent.adapters.llm.runner_factory import build_runner
 from work_agent.adapters.observability.context import new_trace_id
@@ -26,6 +28,7 @@ class Container:
     agent: Any
     runner: Any
     agent_service: AgentService
+    weather_service: WeatherService | None
     _resources: list[Any]  # 需要关闭的资源
 
 
@@ -55,14 +58,25 @@ def build_container(config: Config) -> Container:
     # 4. 构建 Runner
     runner = build_runner(config)
 
-    # 5. 构建 Services
+    # 5. 构建 Weather Service
+    weather_service = None
+    if config.weather_api_key:
+        weather_api = WeatherApiClient(
+            base_url=config.weather_api_base_url,
+            api_key=config.weather_api_key,
+            timeout=config.weather_api_timeout,
+        )
+        weather_service = WeatherService(weather_api)
+        logger.info("Weather service initialized")
+
+    # 6. 构建 Services
     agent_service = AgentService(
         agent=agent,
         runner=runner,
         config=config,
     )
 
-    # 6. 记录需要关闭的资源
+    # 7. 记录需要关闭的资源
     resources: list[Any] = []
     if hasattr(runner, "close"):
         resources.append(runner)
@@ -77,6 +91,7 @@ def build_container(config: Config) -> Container:
         agent=agent,
         runner=runner,
         agent_service=agent_service,
+        weather_service=weather_service,
         _resources=resources,
     )
 
@@ -100,3 +115,31 @@ def shutdown_container(container: Container) -> None:
             logger.error(f"Error closing resource: {e}", exc_info=True)
 
     logger.info("Container shutdown complete")
+
+
+# 全局容器实例
+_global_container: Container | None = None
+
+
+def set_global_container(container: Container) -> None:
+    """设置全局容器实例
+
+    Args:
+        container: 依赖容器
+    """
+    global _global_container
+    _global_container = container
+
+
+def get_weather_service() -> WeatherService:
+    """获取 Weather 服务实例
+
+    Returns:
+        WeatherService: Weather 服务实例
+
+    Raises:
+        RuntimeError: 服务未初始化
+    """
+    if _global_container is None or _global_container.weather_service is None:
+        raise RuntimeError("Weather service not initialized")
+    return _global_container.weather_service
