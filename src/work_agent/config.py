@@ -18,13 +18,20 @@ class Config(BaseSettings):
     )
 
     # OpenAI 配置
-    openai_api_key: str = Field(..., description="OpenAI API Key")
+    openai_api_key: str = Field(default="", description="OpenAI API Key")
     openai_api_base: str = Field(
         default="",
         description="OpenAI API Base URL (用于 vLLM 等兼容服务)"
     )
 
-    # Agent 配置
+    # DashScope 配置
+    dashscope_api_key: str = Field(default="", description="DashScope API Key (用于 Qwen 模型)")
+
+    # Agent ���置
+    agent_backend: Literal["openai", "qwen"] = Field(
+        default="openai",
+        description="Agent 后端类型：openai（OpenAI Agents SDK）、qwen（Qwen-Agent）"
+    )
     agent_model: str = Field(default="gpt-4o", description="Agent 模型名称")
     agent_timeout: float = Field(default=60.0, description="Agent API 请求超时时间（秒）")
 
@@ -71,10 +78,17 @@ def load_config() -> Config:
         print("Required: OPENAI_API_KEY", file=sys.stderr)
         sys.exit(1)
 
-    # 额外校验
-    if not config.openai_api_key or config.openai_api_key == "sk-your-api-key-here":
-        print("Error: OPENAI_API_KEY not found or using placeholder value", file=sys.stderr)
-        print("Please set a valid API key in .env file or environment", file=sys.stderr)
-        sys.exit(1)
+    # 根据 agent_backend 进行校验
+    if config.agent_backend == "openai":
+        if not config.openai_api_key or config.openai_api_key == "sk-your-api-key-here":
+            print("Error: OPENAI_API_KEY not found or using placeholder value", file=sys.stderr)
+            print("Please set a valid API key in .env file or environment", file=sys.stderr)
+            sys.exit(1)
+    elif config.agent_backend == "qwen":
+        if not config.dashscope_api_key:
+            print("Error: DASHSCOPE_API_KEY not found", file=sys.stderr)
+            print("Please set a valid API key in .env file or environment", file=sys.stderr)
+            print("Required for Qwen agent backend", file=sys.stderr)
+            sys.exit(1)
 
     return config

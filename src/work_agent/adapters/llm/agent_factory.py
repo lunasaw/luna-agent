@@ -1,11 +1,11 @@
-"""Agent 工厂 - 构建 OpenAI Agents SDK Agent"""
+"""Agent 工厂 - 根据配置构建不同的 Agent 后端"""
 
 import logging
-import os
 from typing import Any
 
-from agents import Agent
-
+from work_agent.adapters.llm.base_agent import BaseAgent
+from work_agent.adapters.llm.openai_agent_adapter import OpenAIAgentAdapter
+from work_agent.adapters.llm.qwen_agent_adapter import QwenAgentAdapter
 from work_agent.config import Config
 
 logger = logging.getLogger(__name__)
@@ -29,37 +29,45 @@ DEFAULT_INSTRUCTIONS = """你是一个日常工作助理 Agent。
 """
 
 
-def build_agent(config: Config, tools: list[Any]) -> Agent:
+def build_agent(config: Config, tools: list[Any]) -> BaseAgent:
     """
-    构建 Agent 实例
+    根据配置构建 Agent 实例
 
     Args:
         config: 配置对象
         tools: 工具列表
 
     Returns:
-        Agent: Agent 实例
+        BaseAgent: Agent 实例（OpenAI 或 Qwen 后端）
     """
-    logger.info(f"Building agent with model: {config.agent_model}")
+    # 获取后端类型（默认为 openai）
+    backend = getattr(config, 'agent_backend', 'openai')
+
+    logger.info(f"Building agent with backend: {backend}")
+    logger.info(f"Agent model: {config.agent_model}")
     logger.info(f"Agent tools count: {len(tools)}")
 
-    # 配置 OpenAI 环境变量（Agent SDK 会自动读取）
-    os.environ["OPENAI_API_KEY"] = config.openai_api_key
+    # 根据后端类型创建对应的 Agent
+    if backend == "openai":
+        agent = OpenAIAgentAdapter(
+            model=config.agent_model,
+            instructions=DEFAULT_INSTRUCTIONS,
+            api_key=config.openai_api_key,
+            api_base=config.openai_api_base,
+            timeout=config.agent_timeout,
+        )
+    elif backend == "qwen":
+        agent = QwenAgentAdapter(
+            model=config.agent_model,
+            instructions=DEFAULT_INSTRUCTIONS,
+            api_key=config.dashscope_api_key,
+        )
+    else:
+        raise ValueError(f"Unsupported agent backend: {backend}")
 
-    if config.openai_api_base:
-        os.environ["OPENAI_BASE_URL"] = config.openai_api_base
-        logger.info(f"Using custom API base: {config.openai_api_base}")
+    # 添加工具
+    for tool in tools:
+        agent.add_tool(tool)
 
-    # 配置超时（通过环境变量）
-    os.environ["OPENAI_TIMEOUT"] = str(config.agent_timeout)
-    logger.info(f"OpenAI client timeout: {config.agent_timeout}s")
-
-    agent = Agent(
-        name="work-agent",
-        instructions=DEFAULT_INSTRUCTIONS,
-        model=config.agent_model,
-        tools=tools,
-    )
-
-    logger.info("Agent built successfully")
+    logger.info(f"Agent built successfully with {len(tools)} tools")
     return agent
